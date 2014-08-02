@@ -60,6 +60,14 @@
     <Compile Include="IdentityUser.cs" />
     <Compile Include="UserLoginsTable.cs" />
     <Compile Include="UserClaimsTable.cs" />
+    <Compile Include="UserStore.TwoFactorStore.cs" />
+    <Compile Include="UserStore.SecurityStampStore.cs" />
+    <Compile Include="UserStore.PhoneNumberStore.cs" />
+    <Compile Include="UserStore.LockoutStore.cs" />
+    <Compile Include="UserStore.LoginStore.cs" />
+    <Compile Include="UserStore.RoleStore.cs" />
+    <Compile Include="UserStore.PasswordStore.cs" />
+    <Compile Include="UserStore.ClaimsStore.cs" />
     <Compile Include="UserStore.cs" />
     <Compile Include="MySQLDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -72,6 +80,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <Compile Include="UserStore.EmailStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MySQLIdentity.sql" />
