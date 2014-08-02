@@ -28,8 +28,8 @@ namespace AspNet.Identity.MySQL
         /// instance using the Default Connection string
         /// </summary>
         public UserStore()
+            : this(new MySQLDatabase())
         {
-            new UserStore(new MySQLDatabase());
         }
 
         /// <summary>

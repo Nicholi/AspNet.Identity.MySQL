@@ -29,9 +29,9 @@ namespace AspNet.Identity.MySQL
         {
             string commandText = "Delete from UserLogins where UserId = @userId and LoginProvider = @loginProvider and ProviderKey = @providerKey";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("UserId", user.Id);
-            parameters.Add("loginProvider", login.LoginProvider);
-            parameters.Add("providerKey", login.ProviderKey);
+            parameters.Add("@userId", user.Id);
+            parameters.Add("@loginProvider", login.LoginProvider);
+            parameters.Add("@providerKey", login.ProviderKey);
 
             return _database.Execute(commandText, parameters);
         }
@@ -45,7 +45,7 @@ namespace AspNet.Identity.MySQL
         {
             string commandText = "Delete from UserLogins where UserId = @userId";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("UserId", userId);
+            parameters.Add("@userId", userId);
 
             return _database.Execute(commandText, parameters);
         }
@@ -60,9 +60,9 @@ namespace AspNet.Identity.MySQL
         {
             string commandText = "Insert into UserLogins (LoginProvider, ProviderKey, UserId) values (@loginProvider, @providerKey, @userId)";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("loginProvider", login.LoginProvider);
-            parameters.Add("providerKey", login.ProviderKey);
-            parameters.Add("userId", user.Id);
+            parameters.Add("@loginProvider", login.LoginProvider);
+            parameters.Add("@providerKey", login.ProviderKey);
+            parameters.Add("@userId", user.Id);
 
             return _database.Execute(commandText, parameters);
         }
@@ -76,8 +76,8 @@ namespace AspNet.Identity.MySQL
         {
             string commandText = "Select UserId from UserLogins where LoginProvider = @loginProvider and ProviderKey = @providerKey";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("loginProvider", userLogin.LoginProvider);
-            parameters.Add("providerKey", userLogin.ProviderKey);
+            parameters.Add("@loginProvider", userLogin.LoginProvider);
+            parameters.Add("@providerKey", userLogin.ProviderKey);
 
             return _database.GetStrValue(commandText, parameters);
         }
