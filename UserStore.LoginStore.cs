@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore : IUserLoginStore<IdentityUser>
+    public partial class UserStore<TUser> : IUserLoginStore<TUser>
     {
         /// <summary>
         /// Inserts a Login in the UserLoginsTable for a given User
@@ -15,7 +15,7 @@ namespace AspNet.Identity.MySQL
         /// <param name="user">User to have login added</param>
         /// <param name="login">Login to be added</param>
         /// <returns></returns>
-        public Task AddLoginAsync(IdentityUser user, UserLoginInfo login)
+        public Task AddLoginAsync(TUser user, UserLoginInfo login)
         {
             if (user == null)
             {
@@ -33,11 +33,11 @@ namespace AspNet.Identity.MySQL
         }
 
         /// <summary>
-        /// Returns an IdentityUser based on the Login info
+        /// Returns an TUser based on the Login info
         /// </summary>
         /// <param name="login"></param>
         /// <returns></returns>
-        public Task<IdentityUser> FindAsync(UserLoginInfo login)
+        public Task<TUser> FindAsync(UserLoginInfo login)
         {
             if (login == null)
             {
@@ -47,22 +47,22 @@ namespace AspNet.Identity.MySQL
             var userId = userLoginsTable.FindUserIdByLogin(login);
             if (userId != null)
             {
-                IdentityUser user = userTable.GetUserById(userId);
+                TUser user = userTable.GetUserById(userId) as TUser;
                 if (user != null)
                 {
-                    return Task.FromResult<IdentityUser>(user);
+                    return Task.FromResult<TUser>(user);
                 }
             }
 
-            return Task.FromResult<IdentityUser>(null);
+            return Task.FromResult<TUser>(null);
         }
 
         /// <summary>
-        /// Returns list of UserLoginInfo for a given IdentityUser
+        /// Returns list of UserLoginInfo for a given TUser
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public Task<IList<UserLoginInfo>> GetLoginsAsync(IdentityUser user)
+        public Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user)
         {
             List<UserLoginInfo> userLogins = new List<UserLoginInfo>();
             if (user == null)
@@ -80,12 +80,12 @@ namespace AspNet.Identity.MySQL
         }
 
         /// <summary>
-        /// Deletes a login from UserLoginsTable for a given IdentityUser
+        /// Deletes a login from UserLoginsTable for a given TUser
         /// </summary>
         /// <param name="user">User to have login removed</param>
         /// <param name="login">Login to be removed</param>
         /// <returns></returns>
-        public Task RemoveLoginAsync(IdentityUser user, UserLoginInfo login)
+        public Task RemoveLoginAsync(TUser user, UserLoginInfo login)
         {
             if (user == null)
             {

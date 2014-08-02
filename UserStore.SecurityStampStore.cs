@@ -7,16 +7,30 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore : IUserSecurityStampStore<IdentityUser>
+    public partial class UserStore<TUser> : IUserSecurityStampStore<TUser>
     {
-        public Task SetSecurityStampAsync(IdentityUser user, string stamp)
+        /// <summary>
+        ///  Set security stamp
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="stamp"></param>
+        /// <returns></returns>
+        public Task SetSecurityStampAsync(TUser user, string stamp)
         {
-            throw new NotImplementedException();
+            user.SecurityStamp = stamp;
+
+            return Task.FromResult(0);
+
         }
 
-        public Task<string> GetSecurityStampAsync(IdentityUser user)
+        /// <summary>
+        /// Get security stamp
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public Task<string> GetSecurityStampAsync(TUser user)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(user.SecurityStamp);
         }
     }
 }

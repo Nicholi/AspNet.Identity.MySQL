@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore : IUserClaimStore<IdentityUser>
+    public partial class UserStore<TUser> : IUserClaimStore<TUser>
     {
         /// <summary>
         /// Inserts a claim to the UserClaimsTable for the given user
@@ -15,7 +15,7 @@ namespace AspNet.Identity.MySQL
         /// <param name="user">User to have claim added</param>
         /// <param name="claim">Claim to be added</param>
         /// <returns></returns>
-        public Task AddClaimAsync(IdentityUser user, Claim claim)
+        public Task AddClaimAsync(TUser user, Claim claim)
         {
             if (user == null)
             {
@@ -37,7 +37,7 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public Task<IList<Claim>> GetClaimsAsync(IdentityUser user)
+        public Task<IList<Claim>> GetClaimsAsync(TUser user)
         {
             ClaimsIdentity identity = userClaimsTable.FindByUserId(user.Id);
 
@@ -50,7 +50,7 @@ namespace AspNet.Identity.MySQL
         /// <param name="user">User to have claim removed</param>
         /// <param name="claim">Claim to be removed</param>
         /// <returns></returns>
-        public Task RemoveClaimAsync(IdentityUser user, Claim claim)
+        public Task RemoveClaimAsync(TUser user, Claim claim)
         {
             if (user == null)
             {

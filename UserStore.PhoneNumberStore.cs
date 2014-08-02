@@ -7,26 +7,54 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore : IUserPhoneNumberStore<IdentityUser>
+    public partial class UserStore<TUser> : IUserPhoneNumberStore<TUser>
     {
-        public Task SetPhoneNumberAsync(IdentityUser user, string phoneNumber)
+        /// <summary>
+        /// Set user phone number
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="phoneNumber"></param>
+        /// <returns></returns>
+        public Task SetPhoneNumberAsync(TUser user, string phoneNumber)
         {
-            throw new NotImplementedException();
+            user.PhoneNumber = phoneNumber;
+            userTable.Update(user);
+
+            return Task.FromResult(0);
         }
 
-        public Task<string> GetPhoneNumberAsync(IdentityUser user)
+        /// <summary>
+        /// Get user phone number
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public Task<string> GetPhoneNumberAsync(TUser user)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(user.PhoneNumber);
         }
 
-        public Task<bool> GetPhoneNumberConfirmedAsync(IdentityUser user)
+        /// <summary>
+        /// Get if user phone number is confirmed
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public Task<bool> GetPhoneNumberConfirmedAsync(TUser user)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(user.PhoneNumberConfirmed);
         }
 
-        public Task SetPhoneNumberConfirmedAsync(IdentityUser user, bool confirmed)
+        /// <summary>
+        /// Set phone number if confirmed
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="confirmed"></param>
+        /// <returns></returns>
+        public Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed)
         {
-            throw new NotImplementedException();
+            user.PhoneNumberConfirmed = confirmed;
+            userTable.Update(user);
+
+            return Task.FromResult(0);
         }
     }
 }

@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AspNet.Identity.MySQL
 {
     /// <summary>
     /// Class that represents the Users table in the MySQL Database
     /// </summary>
-    public class UserTable
+    public class UserTable<TUser>
+        where TUser :IdentityUser
     {
         private MySQLDatabase _database;
 
@@ -45,13 +47,13 @@ namespace AspNet.Identity.MySQL
         }
 
         /// <summary>
-        /// Returns an IdentityUser given the user's id
+        /// Returns an TUser given the user's id
         /// </summary>
         /// <param name="userId">The user's id</param>
         /// <returns></returns>
-        public IdentityUser GetUserById(string userId)
+        public TUser GetUserById(string userId)
         {
-            IdentityUser user = null;
+            TUser user = null;
             string commandText = "Select * from Users where Id = @id";
             Dictionary<string, object> parameters = new Dictionary<string, object>() { { "@id", userId } };
 
@@ -59,39 +61,59 @@ namespace AspNet.Identity.MySQL
             if (rows != null && rows.Count == 1)
             {
                 var row = rows[0];
-                user = new IdentityUser();
+                user = (TUser)Activator.CreateInstance(typeof(TUser));
                 user.Id = row["Id"];
                 user.UserName = row["UserName"];
                 user.PasswordHash = string.IsNullOrEmpty(row["PasswordHash"]) ? null : row["PasswordHash"];
-                user.SecurityStamp = string.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"]; 
+                user.SecurityStamp = string.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"];
+                user.Email = string.IsNullOrEmpty(row["Email"]) ? null : row["Email"];
+                user.EmailConfirmed = row["EmailConfirmed"] == "1" ? true:false;
+                user.PhoneNumber = string.IsNullOrEmpty(row["PhoneNumber"]) ? null : row["PhoneNumber"];
+                user.PhoneNumberConfirmed = row["PhoneNumberConfirmed"] == "1" ? true : false;
+                user.LockoutEnabled = row["LockoutEnabled"] == "1" ? true : false;
+                user.LockoutEndDateUtc = string.IsNullOrEmpty(row["LockoutEndDateUtc"]) ? DateTime.Now : DateTime.Parse(row["LockoutEndDateUtc"]);
+                user.AccessFailedCount = string.IsNullOrEmpty(row["AccessFailedCount"]) ? 0 : int.Parse(row["AccessFailedCount"]);
             }
 
             return user;
         }
 
         /// <summary>
-        /// Returns a list of IdentityUser instances given a user name
+        /// Returns a list of TUser instances given a user name
         /// </summary>
         /// <param name="userName">User's name</param>
         /// <returns></returns>
-        public List<IdentityUser> GetUserByName(string userName)
+        public List<TUser> GetUserByName(string userName)
         {
-            List<IdentityUser> users = new List<IdentityUser>();
+            List<TUser> users = new List<TUser>();
             string commandText = "Select * from Users where UserName = @name";
             Dictionary<string, object> parameters = new Dictionary<string, object>() { { "@name", userName } };
 
             var rows = _database.Query(commandText, parameters);
             foreach(var row in rows)
             {
-                IdentityUser user = new IdentityUser();
+                TUser user = (TUser)Activator.CreateInstance(typeof(TUser));
                 user.Id = row["Id"];
                 user.UserName = row["UserName"];
                 user.PasswordHash = string.IsNullOrEmpty(row["PasswordHash"]) ? null : row["PasswordHash"];
                 user.SecurityStamp = string.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"];
+                user.Email = string.IsNullOrEmpty(row["Email"]) ? null : row["Email"];
+                user.EmailConfirmed = row["EmailConfirmed"] == "1" ? true : false;
+                user.PhoneNumber = string.IsNullOrEmpty(row["PhoneNumber"]) ? null : row["PhoneNumber"];
+                user.PhoneNumberConfirmed = row["PhoneNumberConfirmed"] == "1" ? true : false;
+                user.LockoutEnabled = row["LockoutEnabled"] == "1" ? true : false;
+                user.TwoFactorEnabled = row["TwoFactorEnabled"] == "1" ? true : false;
+                user.LockoutEndDateUtc = string.IsNullOrEmpty(row["LockoutEndDateUtc"]) ? DateTime.Now : DateTime.Parse(row["LockoutEndDateUtc"]);
+                user.AccessFailedCount = string.IsNullOrEmpty(row["AccessFailedCount"]) ? 0 : int.Parse(row["AccessFailedCount"]);
                 users.Add(user);
             }
 
             return users;
+        }
+
+        public List<TUser> GetUserByEmail(string email)
+        {
+            return null;
         }
 
         /// <summary>
@@ -149,14 +171,23 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public int Insert(IdentityUser user)
+        public int Insert(TUser user)
         {
-            string commandText = "Insert into Users (UserName, Id, PasswordHash, SecurityStamp) values (@name, @id, @pwdHash, @SecStamp)";
+            string commandText = @"Insert into Users (UserName, Id, PasswordHash, SecurityStamp,Email,EmailConfirmed,PhoneNumber,PhoneNumberConfirmed, AccessFailedCount,LockoutEnabled,LockoutEndDateUtc,TwoFactorEnabled)
+                values (@name, @id, @pwdHash, @SecStamp,@email,@emailconfirmed,@phonenumber,@phonenumberconfirmed,@accesscount,@lockoutenabled,@lockoutenddate,@twofactorenabled)";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("@name", user.UserName);
             parameters.Add("@id", user.Id);
             parameters.Add("@pwdHash", user.PasswordHash);
             parameters.Add("@SecStamp", user.SecurityStamp);
+            parameters.Add("@email", user.Email);
+            parameters.Add("@emailconfirmed", user.EmailConfirmed);
+            parameters.Add("@phonenumber", user.PhoneNumber);
+            parameters.Add("@phonenumberconfirmed", user.PhoneNumberConfirmed);
+            parameters.Add("@accesscount", user.AccessFailedCount);
+            parameters.Add("@lockoutenabled", user.LockoutEnabled);
+            parameters.Add("@lockoutenddate", user.LockoutEndDateUtc);
+            parameters.Add("@twofactorenabled", user.TwoFactorEnabled);
 
             return _database.Execute(commandText, parameters);
         }
@@ -180,7 +211,7 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public int Delete(IdentityUser user)
+        public int Delete(TUser user)
         {
             return Delete(user.Id);
         }
@@ -190,14 +221,25 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public int Update(IdentityUser user)
+        public int Update(TUser user)
         {
-            string commandText = "Update Users set UserName = @userName, PasswordHash = @pswHash, SecurityStamp = @secStamp WHERE Id = @userId";
+            string commandText = @"Update Users set UserName = @userName, PasswordHash = @pswHash, SecurityStamp = @secStamp, 
+                Email=@email, EmailConfirmed=@emailconfirmed, PhoneNumber=@phonenumber, PhoneNumberConfirmed=@phonenumberconfirmed,
+                AccessFailedCount=@accesscount, LockoutEnabled=@lockoutenabled, LockoutEndDateUtc=@lockoutenddate, TwoFactorEnabled=@twofactorenabled  
+                WHERE Id = @userId";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("@userName", user.UserName);
             parameters.Add("@pswHash", user.PasswordHash);
             parameters.Add("@secStamp", user.SecurityStamp);
             parameters.Add("@userId", user.Id);
+            parameters.Add("@email", user.Email);
+            parameters.Add("@emailconfirmed", user.EmailConfirmed);
+            parameters.Add("@phonenumber", user.PhoneNumber);
+            parameters.Add("@phonenumberconfirmed", user.PhoneNumberConfirmed);
+            parameters.Add("@accesscount", user.AccessFailedCount);
+            parameters.Add("@lockoutenabled", user.LockoutEnabled);
+            parameters.Add("@lockoutenddate", user.LockoutEndDateUtc);
+            parameters.Add("@twofactorenabled", user.TwoFactorEnabled);
 
             return _database.Execute(commandText, parameters);
         }

@@ -1,40 +1,50 @@
-CREATE TABLE `<DATABASENAME>`.`users` (
-  `Id` VARCHAR(45) NOT NULL,
-  `UserName` VARCHAR(45) NULL,
-  `PasswordHash` VARCHAR(100) NULL,
-  `SecurityStamp` VARCHAR(45) NULL,
-  PRIMARY KEY (`id`));
+CREATE TABLE `roles` (
+  `Id` varchar(128) NOT NULL,
+  `Name` varchar(256) NOT NULL,
+  PRIMARY KEY (`Id`)
+);
 
-CREATE TABLE `<DATABASENAME>`.`roles` (
-  `Id` VARCHAR(45) NOT NULL,
-  `Name` VARCHAR(45) NULL,
-  PRIMARY KEY (`Id`));
+CREATE TABLE `users` (
+  `Id` varchar(128) NOT NULL,
+  `Email` varchar(256) DEFAULT NULL,
+  `EmailConfirmed` tinyint(1) NOT NULL,
+  `PasswordHash` longtext,
+  `SecurityStamp` longtext,
+  `PhoneNumber` longtext,
+  `PhoneNumberConfirmed` tinyint(1) NOT NULL,
+  `TwoFactorEnabled` tinyint(1) NOT NULL,
+  `LockoutEndDateUtc` datetime DEFAULT NULL,
+  `LockoutEnabled` tinyint(1) NOT NULL,
+  `AccessFailedCount` int(11) NOT NULL,
+  `UserName` varchar(256) NOT NULL,
+  PRIMARY KEY (`Id`)
+);
 
-CREATE TABLE `<DATABASENAME>`.`userclaims` (
-  `Id` INT NOT NULL AUTO_INCREMENT,
-  `UserId` VARCHAR(45) NULL,
-  `ClaimType` VARCHAR(100) NULL,
-  `ClaimValue` VARCHAR(100) NULL,
+CREATE TABLE `userclaims` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `UserId` varchar(128) NOT NULL,
+  `ClaimType` longtext,
+  `ClaimValue` longtext,
   PRIMARY KEY (`Id`),
-  FOREIGN KEY (`UserId`)
-    REFERENCES `<DATABASENAME>`.`users` (`Id`) on delete cascade);
+  UNIQUE KEY `Id` (`Id`),
+  KEY `UserId` (`UserId`),
+  CONSTRAINT `ApplicationUser_Claims` FOREIGN KEY (`UserId`) REFERENCES `users` (`Id`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
 
-CREATE TABLE `<DATABASENAME>`.`userlogins` (
-  `UserId` VARCHAR(45) NOT NULL,
-  `ProviderKey` VARCHAR(100) NULL,
-  `LoginProvider` VARCHAR(100) NULL,
-  FOREIGN KEY (`UserId`)
-    REFERENCES `<DATABASENAME>`.`users` (`Id`) on delete cascade);
+CREATE TABLE `userlogins` (
+  `LoginProvider` varchar(128) NOT NULL,
+  `ProviderKey` varchar(128) NOT NULL,
+  `UserId` varchar(128) NOT NULL,
+  PRIMARY KEY (`LoginProvider`,`ProviderKey`,`UserId`),
+  KEY `ApplicationUser_Logins` (`UserId`),
+  CONSTRAINT `ApplicationUser_Logins` FOREIGN KEY (`UserId`) REFERENCES `users` (`Id`) ON DELETE CASCADE ON UPDATE NO ACTION
+);
 
-CREATE TABLE `<DATABASENAME>`.`userroles` (
-  `UserId` VARCHAR(45) NOT NULL,
-  `RoleId` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`UserId`, `RoleId`),
-  FOREIGN KEY (`UserId`)
-    REFERENCES `<DATABASENAME>`.`users` (`Id`) 
-		on delete cascade
-		on update cascade,
-  FOREIGN KEY (`RoleId`)
-    REFERENCES `<DATABASENAME>`.`roles` (`Id`)
-		on delete cascade
-		on update cascade);
+CREATE TABLE `userroles` (
+  `UserId` varchar(128) NOT NULL,
+  `RoleId` varchar(128) NOT NULL,
+  PRIMARY KEY (`UserId`,`RoleId`),
+  KEY `IdentityRole_Users` (`RoleId`),
+  CONSTRAINT `ApplicationUser_Roles` FOREIGN KEY (`UserId`) REFERENCES `users` (`Id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `IdentityRole_Users` FOREIGN KEY (`RoleId`) REFERENCES `roles` (`Id`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ;

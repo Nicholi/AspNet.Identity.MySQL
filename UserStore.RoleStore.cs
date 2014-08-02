@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore : IUserRoleStore<IdentityUser>
+    public partial class UserStore<TUser> : IUserRoleStore<TUser>
     {
         /// <summary>
         /// Inserts a entry in the UserRoles table
@@ -15,7 +15,7 @@ namespace AspNet.Identity.MySQL
         /// <param name="user">User to have role added</param>
         /// <param name="roleName">Name of the role to be added to user</param>
         /// <returns></returns>
-        public Task AddToRoleAsync(IdentityUser user, string roleName)
+        public Task AddToRoleAsync(TUser user, string roleName)
         {
             if (user == null)
             {
@@ -28,7 +28,7 @@ namespace AspNet.Identity.MySQL
             }
 
             string roleId = roleTable.GetRoleId(roleName);
-            if(!string.IsNullOrEmpty(roleId))
+            if (!string.IsNullOrEmpty(roleId))
             {
                 userRolesTable.Insert(user, roleId);
             }
@@ -37,11 +37,11 @@ namespace AspNet.Identity.MySQL
         }
 
         /// <summary>
-        /// Returns the roles for a given IdentityUser
+        /// Returns the roles for a given TUser
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public Task<IList<string>> GetRolesAsync(IdentityUser user)
+        public Task<IList<string>> GetRolesAsync(TUser user)
         {
             if (user == null)
             {
@@ -65,7 +65,7 @@ namespace AspNet.Identity.MySQL
         /// <param name="user"></param>
         /// <param name="role"></param>
         /// <returns></returns>
-        public Task<bool> IsInRoleAsync(IdentityUser user, string role)
+        public Task<bool> IsInRoleAsync(TUser user, string role)
         {
             if (user == null)
             {
@@ -94,7 +94,7 @@ namespace AspNet.Identity.MySQL
         /// <param name="user"></param>
         /// <param name="role"></param>
         /// <returns></returns>
-        public Task RemoveFromRoleAsync(IdentityUser user, string role)
+        public Task RemoveFromRoleAsync(TUser user, string role)
         {
             throw new NotImplementedException();
         }

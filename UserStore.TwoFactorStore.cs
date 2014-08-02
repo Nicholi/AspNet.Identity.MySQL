@@ -7,16 +7,30 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    /*public partial class UserStore : IUserTwoFactorStore<IdentityUser, string>
+    public partial class UserStore<TUser> : IUserTwoFactorStore<TUser, string>
     {
-        public Task SetTwoFactorEnabledAsync(IdentityUser user, bool enabled)
+        /// <summary>
+        /// Set two factor authentication is enabled on the user
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="enabled"></param>
+        /// <returns></returns>
+        public Task SetTwoFactorEnabledAsync(TUser user, bool enabled)
         {
-            throw new NotImplementedException();
+            user.TwoFactorEnabled = enabled;
+            userTable.Update(user);
+
+            return Task.FromResult(0);
         }
 
-        public Task<bool> GetTwoFactorEnabledAsync(IdentityUser user)
+        /// <summary>
+        /// Get if two factor authentication is enabled on the user
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public Task<bool> GetTwoFactorEnabledAsync(TUser user)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(user.TwoFactorEnabled);
         }
-    }*/
+    }
 }

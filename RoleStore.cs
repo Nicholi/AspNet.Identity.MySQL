@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNet.Identity;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
@@ -10,10 +8,20 @@ namespace AspNet.Identity.MySQL
     /// <summary>
     /// Class that implements the key ASP.NET Identity role store iterfaces
     /// </summary>
-    public class RoleStore : IRoleStore<IdentityRole>
+    public class RoleStore<TRole> : IQueryableRoleStore<TRole>
+        where TRole : IdentityRole
     {
         private RoleTable roleTable;
         public MySQLDatabase Database { get; private set; }
+
+        public IQueryable<TRole> Roles
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
 
         /// <summary>
         /// Default constructor that initializes a new MySQLDatabase
@@ -21,7 +29,7 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         public RoleStore()
         {
-            new RoleStore(new MySQLDatabase());
+            new RoleStore<TRole>(new MySQLDatabase());
         }
 
         /// <summary>
@@ -29,12 +37,12 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         /// <param name="database"></param>
         public RoleStore(MySQLDatabase database)
-        { 
+        {
             Database = database;
             roleTable = new RoleTable(database);
         }
 
-        public Task CreateAsync(IdentityRole role)
+        public Task CreateAsync(TRole role)
         {
             if (role == null)
             {
@@ -46,7 +54,7 @@ namespace AspNet.Identity.MySQL
             return Task.FromResult<object>(null);
         }
 
-        public Task DeleteAsync(IdentityRole role)
+        public Task DeleteAsync(TRole role)
         {
             if (role == null)
             {
@@ -58,21 +66,21 @@ namespace AspNet.Identity.MySQL
             return Task.FromResult<Object>(null);
         }
 
-        public Task<IdentityRole> FindByIdAsync(string roleId)
+        public Task<TRole> FindByIdAsync(string roleId)
         {
-            IdentityRole result = roleTable.GetRoleById(roleId);
+            TRole result = roleTable.GetRoleById(roleId) as TRole;
 
-            return Task.FromResult<IdentityRole>(result);
+            return Task.FromResult<TRole>(result);
         }
 
-        public Task<IdentityRole> FindByNameAsync(string roleName)
+        public Task<TRole> FindByNameAsync(string roleName)
         {
-            IdentityRole result = roleTable.GetRoleByName(roleName);
+            TRole result = roleTable.GetRoleByName(roleName) as TRole;
 
-            return Task.FromResult<IdentityRole>(result);
+            return Task.FromResult<TRole>(result);
         }
 
-        public Task UpdateAsync(IdentityRole role)
+        public Task UpdateAsync(TRole role)
         {
             if (role == null)
             {
@@ -92,5 +100,6 @@ namespace AspNet.Identity.MySQL
                 Database = null;
             }
         }
+
     }
 }

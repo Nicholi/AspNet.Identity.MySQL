@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore : IUserPasswordStore<IdentityUser>
+    public partial class UserStore<TUser> : IUserPasswordStore<TUser>
     {
         /// <summary>
-        /// Returns the PasswordHash for a given IdentityUser
+        /// Returns the PasswordHash for a given TUser
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public Task<string> GetPasswordHashAsync(IdentityUser user)
+        public Task<string> GetPasswordHashAsync(TUser user)
         {
             string passwordHash = userTable.GetPasswordHash(user.Id);
 
@@ -26,20 +26,20 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public Task<bool> HasPasswordAsync(IdentityUser user)
+        public Task<bool> HasPasswordAsync(TUser user)
         {
             var hasPassword = !string.IsNullOrEmpty(userTable.GetPasswordHash(user.Id));
 
-            return Task.FromResult<bool>(hasPassword);
+            return Task.FromResult<bool>(Boolean.Parse(hasPassword.ToString()));
         }
 
         /// <summary>
-        /// Sets the password hash for a given IdentityUser
+        /// Sets the password hash for a given TUser
         /// </summary>
         /// <param name="user"></param>
         /// <param name="passwordHash"></param>
         /// <returns></returns>
-        public Task SetPasswordHashAsync(IdentityUser user, string passwordHash)
+        public Task SetPasswordHashAsync(TUser user, string passwordHash)
         {
             user.PasswordHash = passwordHash;
 
