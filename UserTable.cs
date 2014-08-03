@@ -7,7 +7,7 @@ namespace AspNet.Identity.MySQL
     /// Class that represents the Users table in the MySQL Database
     /// </summary>
     public class UserTable<TUser>
-        where TUser :IdentityUser
+        where TUser : IdentityUser
     {
         private MySQLDatabase _database;
 

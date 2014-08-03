@@ -14,20 +14,20 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         public IdentityRole()
         {
-            Id = Guid.NewGuid().ToString();
         }
+
         /// <summary>
         /// Constructor that takes names as argument 
         /// </summary>
         /// <param name="name"></param>
-        public IdentityRole(string name) : this()
+        public IdentityRole(string name)
         {
             Name = name;
         }
 
         public IdentityRole(string name, string id)
+            : this(name)
         {
-            Name = name;
             Id = id;
         }
 

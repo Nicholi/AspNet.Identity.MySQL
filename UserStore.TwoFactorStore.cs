@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore<TUser> : IUserTwoFactorStore<TUser, string>
+    public partial class UserStore<TUser, TRole> : IUserTwoFactorStore<TUser, string>
     {
         /// <summary>
         /// Set two factor authentication is enabled on the user

@@ -14,7 +14,6 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         public IdentityUser()
         {
-            Id = Guid.NewGuid().ToString();
         }
 
         /// <summary>
@@ -22,9 +21,14 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         /// <param name="userName"></param>
         public IdentityUser(string userName)
-            : this()
         {
             UserName = userName;
+        }
+
+        public IdentityUser(string name, string id)
+            : this(name)
+        {
+            Id = id;
         }
 
         /// <summary>

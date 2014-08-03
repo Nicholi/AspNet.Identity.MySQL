@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore<TUser> : IUserLockoutStore<TUser, string>
+    public partial class UserStore<TUser, TRole> : IUserLockoutStore<TUser, string>
     {
         /// <summary>
         /// Get user lock out end date

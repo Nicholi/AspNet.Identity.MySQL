@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore<TUser> : IUserEmailStore<TUser>
+    public partial class UserStore<TUser, TRole> : IUserEmailStore<TUser>
     {
         /// <summary>
         /// Set email on user

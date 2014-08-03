@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore<TUser> : IUserSecurityStampStore<TUser>
+    public partial class UserStore<TUser, TRole> : IUserSecurityStampStore<TUser>
     {
         /// <summary>
         ///  Set security stamp

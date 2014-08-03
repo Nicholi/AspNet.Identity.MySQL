@@ -213,6 +213,22 @@ namespace AspNet.Identity.MySQL
             return value;
         }
 
+        /// <summary>
+        /// Helper method to return query a UInt32 value 
+        /// </summary>
+        /// <param name="commandText">The MySQL query to execute</param>
+        /// <param name="parameters">Parameters to pass to the MySQL query</param>
+        /// <returns>The UInt32 value resulting from the query</returns>
+        /*public uint GetUInt32Value(string commandText, Dictionary<string, object> parameters)
+        {
+            Object value = QueryValue(commandText, parameters);
+            if (value != null)
+            {
+                return Convert.ToUInt32(value);
+            }
+            return 0u;
+        }*/
+
         public void Dispose()
         {
             if (_connection != null)

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore<TUser> : IUserClaimStore<TUser>
+    public partial class UserStore<TUser, TRole> : IUserClaimStore<TUser>
     {
         /// <summary>
         /// Inserts a claim to the UserClaimsTable for the given user

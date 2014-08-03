@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore<TUser> : IUserPhoneNumberStore<TUser>
+    public partial class UserStore<TUser, TRole> : IUserPhoneNumberStore<TUser>
     {
         /// <summary>
         /// Set user phone number

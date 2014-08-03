@@ -10,12 +10,14 @@ namespace AspNet.Identity.MySQL
     /// <summary>
     /// Class that implements the key ASP.NET Identity user store iterfaces
     /// </summary>
-    public partial class UserStore<TUser> : IUserStore<TUser>,
+    public partial class UserStore<TUser, TRole> : 
+        IUserStore<TUser>,
         IQueryableUserStore<TUser>
         where TUser : IdentityUser
+        where TRole : IdentityRole
     {
         private UserTable<TUser> userTable;
-        private RoleTable roleTable;
+        private RoleTable<TRole> roleTable;
         private UserRolesTable userRolesTable;
         private UserClaimsTable userClaimsTable;
         private UserLoginsTable userLoginsTable;
@@ -38,7 +40,7 @@ namespace AspNet.Identity.MySQL
         { 
             Database = database;
             userTable = new UserTable<TUser>(database);
-            roleTable = new RoleTable(database);
+            roleTable = new RoleTable<TRole>(database);
             userRolesTable = new UserRolesTable(database);
             userClaimsTable = new UserClaimsTable(database);
             userLoginsTable = new UserLoginsTable(database);

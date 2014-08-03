@@ -8,10 +8,12 @@ namespace AspNet.Identity.MySQL
     /// <summary>
     /// Class that implements the key ASP.NET Identity role store iterfaces
     /// </summary>
-    public class RoleStore<TRole> : IQueryableRoleStore<TRole>
+    public class RoleStore<TRole> : 
+        IRoleStore<TRole>,
+        IQueryableRoleStore<TRole>
         where TRole : IdentityRole
     {
-        private RoleTable roleTable;
+        private RoleTable<TRole> roleTable;
         public MySQLDatabase Database { get; private set; }
 
         public IQueryable<TRole> Roles
@@ -28,8 +30,8 @@ namespace AspNet.Identity.MySQL
         /// instance using the Default Connection string
         /// </summary>
         public RoleStore()
+            : this(new MySQLDatabase())
         {
-            new RoleStore<TRole>(new MySQLDatabase());
         }
 
         /// <summary>
@@ -39,7 +41,16 @@ namespace AspNet.Identity.MySQL
         public RoleStore(MySQLDatabase database)
         {
             Database = database;
-            roleTable = new RoleTable(database);
+            roleTable = new RoleTable<TRole>(database);
+        }
+
+        public void Dispose()
+        {
+            if (Database != null)
+            {
+                Database.Dispose();
+                Database = null;
+            }
         }
 
         public Task CreateAsync(TRole role)
@@ -91,15 +102,5 @@ namespace AspNet.Identity.MySQL
 
             return Task.FromResult<Object>(null);
         }
-
-        public void Dispose()
-        {
-            if (Database != null)
-            {
-                Database.Dispose();
-                Database = null;
-            }
-        }
-
     }
 }

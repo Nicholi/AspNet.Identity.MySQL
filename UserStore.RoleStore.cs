@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore<TUser> : IUserRoleStore<TUser>
+    public partial class UserStore<TUser, TRole> : IUserRoleStore<TUser>
     {
         /// <summary>
         /// Inserts a entry in the UserRoles table

@@ -6,7 +6,8 @@ namespace AspNet.Identity.MySQL
     /// <summary>
     /// Class that represents the Role table in the MySQL Database
     /// </summary>
-    public class RoleTable 
+    public class RoleTable<TRole>
+        where TRole : IdentityRole
     {
         private MySQLDatabase _database;
 

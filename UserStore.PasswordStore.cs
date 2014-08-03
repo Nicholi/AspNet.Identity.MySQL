@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.MySQL
 {
-    public partial class UserStore<TUser> : IUserPasswordStore<TUser>
+    public partial class UserStore<TUser, TRole> : IUserPasswordStore<TUser>
     {
         /// <summary>
         /// Returns the PasswordHash for a given TUser
