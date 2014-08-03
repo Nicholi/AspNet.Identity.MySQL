@@ -6,7 +6,7 @@ CREATE TABLE `roles` (
 
 CREATE TABLE `users` (
   `Id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `Email` varchar(256) DEFAULT NULL,
+  `Email` varchar(256) NOT NULL,
   `EmailConfirmed` tinyint(1) NOT NULL,
   `PasswordHash` longtext,
   `SecurityStamp` longtext,
@@ -27,7 +27,7 @@ CREATE TABLE `userclaims` (
   `ClaimValue` longtext,
   PRIMARY KEY (`Id`),
   KEY `UserId` (`UserId`),
-  CONSTRAINT `ApplicationUser_Claims` FOREIGN KEY (`UserId`) REFERENCES `users` (`Id`) ON DELETE CASCADE ON UPDATE NO ACTION
+  CONSTRAINT `ApplicationUser_Claims` FOREIGN KEY (`UserId`) REFERENCES `users` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE `userlogins` (
@@ -36,7 +36,7 @@ CREATE TABLE `userlogins` (
   `UserId` int(11) unsigned NOT NULL,
   PRIMARY KEY (`LoginProvider`,`ProviderKey`,`UserId`),
   KEY `ApplicationUser_Logins` (`UserId`),
-  CONSTRAINT `ApplicationUser_Logins` FOREIGN KEY (`UserId`) REFERENCES `users` (`Id`) ON DELETE CASCADE ON UPDATE NO ACTION
+  CONSTRAINT `ApplicationUser_Logins` FOREIGN KEY (`UserId`) REFERENCES `users` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE `userroles` (
@@ -45,6 +45,6 @@ CREATE TABLE `userroles` (
   PRIMARY KEY (`UserId`,`RoleId`),
   KEY `IdentityRole_Users` (`UserId`),
   KEY `IdentityRole_Roles` (`RoleId`),
-  CONSTRAINT `ApplicationUser_Roles` FOREIGN KEY (`UserId`) REFERENCES `users` (`Id`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  CONSTRAINT `IdentityRole_Users` FOREIGN KEY (`RoleId`) REFERENCES `roles` (`Id`) ON DELETE CASCADE ON UPDATE NO ACTION
+  CONSTRAINT `IdentityRole_Users` FOREIGN KEY (`UserId`) REFERENCES `users` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `IdentityRole_Roles` FOREIGN KEY (`RoleId`) REFERENCES `roles` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
 );

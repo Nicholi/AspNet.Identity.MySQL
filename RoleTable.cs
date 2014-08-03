@@ -27,7 +27,7 @@ namespace AspNet.Identity.MySQL
         /// <returns></returns>
         public int Delete(string roleId)
         {
-            string commandText = "Delete from Roles where Id = @id";
+            string commandText = "Delete from roles where Id = @id";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("@id", roleId);
 
@@ -39,14 +39,14 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         /// <param name="roleName">The role's name</param>
         /// <returns></returns>
-        public int Insert(IdentityRole role)
+        public void Insert(IdentityRole role)
         {
-            string commandText = "Insert into Roles (Id, Name) values (@id, @name)";
+            string commandText = "Insert into roles (Name) values (@name)";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("@name", role.Name);
-            parameters.Add("@id", role.Id);
 
-            return _database.Execute(commandText, parameters);
+            var roleId = _database.Insert(commandText, parameters);
+            role.Id = roleId.ToString();
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace AspNet.Identity.MySQL
         /// <returns>Role name</returns>
         public string GetRoleName(string roleId)
         {
-            string commandText = "Select Name from Roles where Id = @id";
+            string commandText = "Select Name from roles where Id = @id";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("@id", roleId);
 
@@ -71,7 +71,7 @@ namespace AspNet.Identity.MySQL
         public string GetRoleId(string roleName)
         {
             string roleId = null;
-            string commandText = "Select Id from Roles where Name = @name";
+            string commandText = "Select Id from roles where Name = @name";
             Dictionary<string, object> parameters = new Dictionary<string, object>() { { "@name", roleName } };
 
             var result = _database.QueryValue(commandText, parameters);
@@ -122,7 +122,7 @@ namespace AspNet.Identity.MySQL
 
         public int Update(IdentityRole role)
         {
-            string commandText = "Update Roles set Name = @name where Id = @id";
+            string commandText = "Update roles set Name = @name where Id = @id";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("@id", role.Id);
 

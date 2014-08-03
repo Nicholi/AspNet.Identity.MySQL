@@ -134,6 +134,36 @@ namespace AspNet.Identity.MySQL
         }
 
         /// <summary>
+        /// Executes a sql insert which expects back an auto_increment'd field result
+        /// </summary>
+        /// <param name="commandText"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public long Insert(string commandText, Dictionary<string, object> parameters)
+        {
+            long result = 0L;
+
+            if (String.IsNullOrEmpty(commandText))
+            {
+                throw new ArgumentException("Command text cannot be null or empty.");
+            }
+
+            try
+            {
+                EnsureConnectionOpen();
+                var command = CreateCommand(commandText, parameters);
+                command.ExecuteNonQuery();
+                result = command.LastInsertedId;
+            }
+            finally
+            {
+                _connection.Close();
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Opens a connection if not open
         /// </summary>
         private void EnsureConnectionOpen()
@@ -209,8 +239,12 @@ namespace AspNet.Identity.MySQL
         /// <returns>The string value resulting from the query</returns>
         public string GetStrValue(string commandText, Dictionary<string, object> parameters)
         {
-            string value = QueryValue(commandText, parameters) as string;
-            return value;
+            Object value = QueryValue(commandText, parameters);
+            if (value != null)
+            {
+                return Convert.ToString(QueryValue(commandText, parameters));
+            }
+            return null;
         }
 
         /// <summary>
@@ -219,7 +253,7 @@ namespace AspNet.Identity.MySQL
         /// <param name="commandText">The MySQL query to execute</param>
         /// <param name="parameters">Parameters to pass to the MySQL query</param>
         /// <returns>The UInt32 value resulting from the query</returns>
-        /*public uint GetUInt32Value(string commandText, Dictionary<string, object> parameters)
+        public uint GetUInt32Value(string commandText, Dictionary<string, object> parameters)
         {
             Object value = QueryValue(commandText, parameters);
             if (value != null)
@@ -227,7 +261,7 @@ namespace AspNet.Identity.MySQL
                 return Convert.ToUInt32(value);
             }
             return 0u;
-        }*/
+        }
 
         public void Dispose()
         {

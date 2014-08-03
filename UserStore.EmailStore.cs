@@ -70,10 +70,11 @@ namespace AspNet.Identity.MySQL
                 throw new ArgumentNullException("email");
             }
 
-            TUser result = userTable.GetUserByEmail(email) as TUser;
-            if (result != null)
+            List<TUser> result = userTable.GetUserByEmail(email) as List<TUser>;
+            // Should I throw if > 1 user?
+            if (result != null && result.Count == 1)
             {
-                return Task.FromResult<TUser>(result);
+                return Task.FromResult<TUser>(result[0]);
             }
 
             return Task.FromResult<TUser>(null);

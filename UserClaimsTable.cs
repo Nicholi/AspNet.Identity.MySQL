@@ -27,7 +27,7 @@ namespace AspNet.Identity.MySQL
         public ClaimsIdentity FindByUserId(string userId)
         {
             ClaimsIdentity claims = new ClaimsIdentity();
-            string commandText = "Select * from UserClaims where UserId = @UserId";
+            string commandText = "Select * from userclaims where UserId = @UserId";
             Dictionary<string, object> parameters = new Dictionary<string, object>() { { "@UserId", userId } };
 
             var rows = _database.Query(commandText, parameters);
@@ -47,7 +47,7 @@ namespace AspNet.Identity.MySQL
         /// <returns></returns>
         public int Delete(string userId)
         {
-            string commandText = "Delete from UserClaims where UserId = @UserId";
+            string commandText = "Delete from userclaims where UserId = @UserId";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("@UserId", userId);
 
@@ -62,7 +62,7 @@ namespace AspNet.Identity.MySQL
         /// <returns></returns>
         public int Insert(Claim userClaim, string userId)
         {
-            string commandText = "Insert into UserClaims (ClaimValue, ClaimType, UserId) values (@Value, @Type, @UserId)";
+            string commandText = "Insert into userclaims (ClaimValue, ClaimType, UserId) values (@Value, @Type, @UserId)";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("@Value", userClaim.Value);
             parameters.Add("@Type", userClaim.Type);
@@ -79,7 +79,7 @@ namespace AspNet.Identity.MySQL
         /// <returns></returns>
         public int Delete(IdentityUser user, Claim claim)
         {
-            string commandText = "Delete from UserClaims where UserId = @UserId and ClaimValue = @Value and ClaimType = @Type";
+            string commandText = "Delete from userclaims where UserId = @UserId and ClaimValue = @Value and ClaimType = @Type";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("@UserId", user.Id);
             parameters.Add("@Value", claim.Value);
