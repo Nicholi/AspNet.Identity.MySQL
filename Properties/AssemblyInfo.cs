@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Microsoft.AspNet.Identity.MySQL")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Custom implementation of Asp.Net Identity for MySQL without EntityFramework")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft Corp.")]
 [assembly: AssemblyProduct("Microsoft.AspNet.Identity.MySQL")]
