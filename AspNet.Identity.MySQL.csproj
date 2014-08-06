@@ -79,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="AspNet.Identity.MySQL.nuspec" />
     <None Include="packages.config" />
     <Compile Include="UserStore.EmailStore.cs" />
   </ItemGroup>
