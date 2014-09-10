@@ -13,7 +13,10 @@ namespace AspNet.Identity.MySQL
      /// </summary>
     public class MySQLDatabase : IDisposable
     {
-        private MySqlConnection _connection;
+        private MySqlConnection _connection = null;
+
+        private bool _newConnection = false;
+        private String _connectionString;
 
         /// Default constructor which uses the "DefaultConnection" connectionString
         /// </summary>
@@ -30,6 +33,16 @@ namespace AspNet.Identity.MySQL
         {
             string connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
             _connection = new MySqlConnection(connectionString);
+        }
+
+        /// <summary>
+        /// Constructor which takes the connection string name and lets us know to form a new MySqlConnection for every action
+        /// </summary>
+        /// <param name="connectionStringName"></param>
+        public MySQLDatabase(string connectionStringName, bool newConnections)
+        {
+            _connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+            _newConnection = newConnections;
         }
 
         /// <summary>
@@ -55,7 +68,7 @@ namespace AspNet.Identity.MySQL
             }
             finally
             {
-                _connection.Close();
+                EnsureConnectionClosed();
             }
 
             return result;
@@ -157,7 +170,7 @@ namespace AspNet.Identity.MySQL
             }
             finally
             {
-                _connection.Close();
+                EnsureConnectionClosed();
             }
 
             return result;
@@ -168,6 +181,10 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         private void EnsureConnectionOpen()
         {
+            if (_connection == null)
+            {
+                return;
+            }
             var retries = 3;
             if (_connection.State == ConnectionState.Open)
             {
@@ -189,11 +206,16 @@ namespace AspNet.Identity.MySQL
         /// </summary>
         public void EnsureConnectionClosed()
         {
-            if (_connection.State == ConnectionState.Open)
+            if (_connection != null && _connection.State == ConnectionState.Open)
             {
                 _connection.Close();
             }
         }
+
+         private MySqlConnection CurrentConnection
+         {
+             get { return _newConnection ? new MySqlConnection(_connectionString) : _connection; }
+         }
 
         /// <summary>
         /// Creates a MySQLCommand with the given parameters
@@ -203,7 +225,7 @@ namespace AspNet.Identity.MySQL
         /// <returns></returns>
         private MySqlCommand CreateCommand(string commandText, Dictionary<string, object> parameters)
         {
-            MySqlCommand command = _connection.CreateCommand();
+            MySqlCommand command = CurrentConnection.CreateCommand();
             command.CommandText = commandText;
             AddParameters(command, parameters);
 
