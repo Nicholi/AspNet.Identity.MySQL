@@ -37,6 +37,7 @@ namespace AspNet.Identity.MySQL
 
         /// <summary>
         /// Constructor which takes the connection string name and lets us know to form a new MySqlConnection for every action
+        /// Do not store a persistent connection object. Makes the class threadsafe.
         /// </summary>
         /// <param name="connectionStringName"></param>
         public MySQLDatabase(string connectionStringName, bool newConnections)
@@ -60,15 +61,17 @@ namespace AspNet.Identity.MySQL
                 throw new ArgumentException("Command text cannot be null or empty.");
             }
 
+            MySqlConnection connection = null;
             try
             {
-                EnsureConnectionOpen();
-                var command = CreateCommand(commandText, parameters);
+                connection = CurrentConnection;
+                EnsureConnectionOpen(connection);
+                var command = CreateCommand(connection, commandText, parameters);
                 result = command.ExecuteNonQuery();
             }
             finally
             {
-                EnsureConnectionClosed();
+                EnsureConnectionClosed(connection);
             }
 
             return result;
@@ -89,15 +92,17 @@ namespace AspNet.Identity.MySQL
                 throw new ArgumentException("Command text cannot be null or empty.");
             }
 
+            MySqlConnection connection = null;
             try
             {
-                EnsureConnectionOpen();
-                var command = CreateCommand(commandText, parameters);
+                connection = CurrentConnection;
+                EnsureConnectionOpen(connection);
+                var command = CreateCommand(connection, commandText, parameters);
                 result = command.ExecuteScalar();
             }
             finally
             {
-                EnsureConnectionClosed();
+                EnsureConnectionClosed(connection);
             }
 
             return result;
@@ -118,10 +123,12 @@ namespace AspNet.Identity.MySQL
                 throw new ArgumentException("Command text cannot be null or empty.");
             }
 
+            MySqlConnection connection = null;
             try
             {
-                EnsureConnectionOpen();
-                var command = CreateCommand(commandText, parameters);
+                connection = CurrentConnection;
+                EnsureConnectionOpen(connection);
+                var command = CreateCommand(connection, commandText, parameters);
                 using (MySqlDataReader reader = command.ExecuteReader())
                 {
                     rows = new List<Dictionary<string, string>>();
@@ -140,7 +147,7 @@ namespace AspNet.Identity.MySQL
             }
             finally
             {
-                EnsureConnectionClosed();
+                EnsureConnectionClosed(connection);
             }
 
             return rows;
@@ -161,16 +168,18 @@ namespace AspNet.Identity.MySQL
                 throw new ArgumentException("Command text cannot be null or empty.");
             }
 
+            MySqlConnection connection = null;
             try
             {
-                EnsureConnectionOpen();
-                var command = CreateCommand(commandText, parameters);
+                connection = CurrentConnection;
+                EnsureConnectionOpen(connection);
+                var command = CreateCommand(connection, commandText, parameters);
                 command.ExecuteNonQuery();
                 result = command.LastInsertedId;
             }
             finally
             {
-                EnsureConnectionClosed();
+                EnsureConnectionClosed(connection);
             }
 
             return result;
@@ -179,24 +188,24 @@ namespace AspNet.Identity.MySQL
         /// <summary>
         /// Opens a connection if not open
         /// </summary>
-        private void EnsureConnectionOpen()
+        private static void EnsureConnectionOpen(MySqlConnection connection)
         {
-            if (_connection == null)
+            if (connection == null)
             {
                 return;
             }
             var retries = 3;
-            if (_connection.State == ConnectionState.Open)
+            if (connection.State == ConnectionState.Open)
             {
                 return;
             }
             else
             {
-                while (retries >= 0 && _connection.State != ConnectionState.Open)
+                while (retries >= 0 && connection.State != ConnectionState.Open)
                 {
-                    _connection.Open();
+                    connection.Open();
                     retries--;
-                    Thread.Sleep(30);
+                    Thread.Sleep(3);
                 }
             }
         }
@@ -204,11 +213,20 @@ namespace AspNet.Identity.MySQL
         /// <summary>
         /// Closes a connection if open
         /// </summary>
-        public void EnsureConnectionClosed()
+        public void EnsureConnectionClosed(MySqlConnection connection)
         {
-            if (_connection != null && _connection.State == ConnectionState.Open)
+            if (connection != null && connection.State == ConnectionState.Open)
             {
-                _connection.Close();
+                connection.Close();
+                if (_newConnection)
+                {
+                    // we also want to dispose of connection at this point, since we create a new connection per action
+                    try
+                    {
+                        connection.Dispose();
+                    }
+                    catch { }
+                }
             }
         }
 
@@ -223,9 +241,9 @@ namespace AspNet.Identity.MySQL
         /// <param name="commandText">The MySQL query to execute</param>
         /// <param name="parameters">Parameters to pass to the MySQL query</param>
         /// <returns></returns>
-        private MySqlCommand CreateCommand(string commandText, Dictionary<string, object> parameters)
+        private static MySqlCommand CreateCommand(MySqlConnection connection, string commandText, Dictionary<string, object> parameters)
         {
-            MySqlCommand command = CurrentConnection.CreateCommand();
+            MySqlCommand command = connection.CreateCommand();
             command.CommandText = commandText;
             AddParameters(command, parameters);
 
