@@ -205,7 +205,7 @@ namespace AspNet.Identity.MySQL
                 {
                     connection.Open();
                     retries--;
-                    Thread.Sleep(3);
+                    Thread.Sleep(30);
                 }
             }
         }
@@ -218,15 +218,16 @@ namespace AspNet.Identity.MySQL
             if (connection != null && connection.State == ConnectionState.Open)
             {
                 connection.Close();
-                if (_newConnection)
+            }
+
+            if (connection != null && _newConnection)
+            {
+                // we also want to dispose of connection at this point, since we create a new connection per action
+                try
                 {
-                    // we also want to dispose of connection at this point, since we create a new connection per action
-                    try
-                    {
-                        connection.Dispose();
-                    }
-                    catch { }
+                    connection.Dispose();
                 }
+                catch { }
             }
         }
 
