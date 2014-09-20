@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using System.Data.Common;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -66,8 +67,10 @@ namespace AspNet.Identity.MySQL
             {
                 connection = CurrentConnection;
                 EnsureConnectionOpen(connection);
-                var command = CreateCommand(connection, commandText, parameters);
-                result = command.ExecuteNonQuery();
+                using (var dbCmd = CreateCommand(connection, commandText, parameters))
+                {
+                    result = dbCmd.ExecuteNonQuery();
+                }
             }
             finally
             {
@@ -76,6 +79,43 @@ namespace AspNet.Identity.MySQL
 
             return result;
         }
+
+        /// <summary>
+        ///  way better than the ugly method that retuned a Dictionary of <String, Object> let caller specify how to pull out record from db
+        /// </summary>
+        /// <typeparam name="TRecord"></typeparam>
+        /// <param name="commandText"></param>
+        /// <param name="parameters"></param>
+        /// <param name="recordIteration"></param>
+        /// <returns></returns>
+         public List<TRecord> ExecuteReader<TRecord>(String commandText, Dictionary<string, object> parameters, Func<DbDataReader, TRecord> recordIteration)
+         {
+          if (String.IsNullOrEmpty(commandText))
+            {
+                throw new ArgumentException("Command text cannot be null or empty.");
+            }
+
+            MySqlConnection connection = null;
+            try
+            {
+                connection = CurrentConnection;
+                EnsureConnectionOpen(connection);
+                using (var dbCmd = CreateCommand(connection, commandText, parameters))
+                using (var dbReader = dbCmd.ExecuteReader())
+                {
+                    var records = new List<TRecord>();
+                    while (dbReader.Read())
+                    {
+                        records.Add(recordIteration(dbReader));
+                    }
+                    return records;
+                }
+            }
+            finally
+            {
+                EnsureConnectionClosed(connection);
+            }
+         }
 
         /// <summary>
         /// Executes a MySQL query that returns a single scalar value as the result.
@@ -97,8 +137,10 @@ namespace AspNet.Identity.MySQL
             {
                 connection = CurrentConnection;
                 EnsureConnectionOpen(connection);
-                var command = CreateCommand(connection, commandText, parameters);
-                result = command.ExecuteScalar();
+                using (var dbCmd = CreateCommand(connection, commandText, parameters))
+                {
+                    result = dbCmd.ExecuteScalar();
+                }
             }
             finally
             {
@@ -128,29 +170,28 @@ namespace AspNet.Identity.MySQL
             {
                 connection = CurrentConnection;
                 EnsureConnectionOpen(connection);
-                var command = CreateCommand(connection, commandText, parameters);
-                using (MySqlDataReader reader = command.ExecuteReader())
+                using (var dbCmd = CreateCommand(connection, commandText, parameters))
+                using (var dbReader = dbCmd.ExecuteReader())
                 {
                     rows = new List<Dictionary<string, string>>();
-                    while (reader.Read())
+                    while (dbReader.Read())
                     {
                         var row = new Dictionary<string, string>();
-                        for (var i = 0; i < reader.FieldCount; i++)
+                        for (var i = 0; i < dbReader.FieldCount; i++)
                         {
-                            var columnName = reader.GetName(i);
-                            var columnValue = reader.IsDBNull(i) ? null : reader.GetString(i);
+                            var columnName = dbReader.GetName(i);
+                            var columnValue = dbReader.IsDBNull(i) ? null : dbReader.GetString(i);
                             row.Add(columnName, columnValue);
                         }
                         rows.Add(row);
                     }
+                    return rows;
                 }
             }
             finally
             {
                 EnsureConnectionClosed(connection);
             }
-
-            return rows;
         }
 
         /// <summary>
@@ -173,9 +214,11 @@ namespace AspNet.Identity.MySQL
             {
                 connection = CurrentConnection;
                 EnsureConnectionOpen(connection);
-                var command = CreateCommand(connection, commandText, parameters);
-                command.ExecuteNonQuery();
-                result = command.LastInsertedId;
+                using (var dbCmd = CreateCommand(connection, commandText, parameters))
+                {
+                    dbCmd.ExecuteNonQuery();
+                    result = dbCmd.LastInsertedId;
+                }
             }
             finally
             {

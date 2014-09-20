@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNet.Identity;
 using System.Collections.Generic;
+using System.Data.Common;
 
 namespace AspNet.Identity.MySQL
 {
@@ -89,18 +90,15 @@ namespace AspNet.Identity.MySQL
         /// <returns></returns>
         public List<UserLoginInfo> FindByUserId(string userId)
         {
-            List<UserLoginInfo> logins = new List<UserLoginInfo>();
             string commandText = "Select * from userlogins where UserId = @userId";
             Dictionary<string, object> parameters = new Dictionary<string, object>() { { "@userId", userId } };
 
-            var rows = _database.Query(commandText, parameters);
-            foreach (var row in rows)
-            {
-                var login = new UserLoginInfo(row["LoginProvider"], row["ProviderKey"]);
-                logins.Add(login);
-            }
+            return _database.ExecuteReader(commandText, parameters, this.ReadUserLoginInfo);
+        }
 
-            return logins;
+        private UserLoginInfo ReadUserLoginInfo(DbDataReader dbReader)
+        {
+            return new UserLoginInfo(dbReader.GetString("LoginProvider"), dbReader.GetString("ProviderKey"));
         }
     }
 }

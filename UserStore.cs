@@ -57,10 +57,7 @@ namespace AspNet.Identity.MySQL
 
         public IQueryable<TUser> Users
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get { return userTable.GetUsers().AsQueryable(); }
         }
 
 

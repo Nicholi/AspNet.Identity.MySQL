@@ -22,6 +22,16 @@ namespace AspNet.Identity.MySQL
         }
 
         /// <summary>
+        /// Ugly implementation for IQueryable on UserStore, we pull the whole db first than cast as Queryable
+        /// </summary>
+        /// <returns></returns>
+        public List<TUser> GetUsers()
+        {
+            String commandText = "SELECT * FROM users";
+            return _database.ExecuteReader(commandText, null, this.ReadUser);
+        }
+
+        /// <summary>
         /// Returns the user's name given a user id
         /// </summary>
         /// <param name="userId"></param>
@@ -58,30 +68,31 @@ namespace AspNet.Identity.MySQL
             string commandText = "Select * from users where Id = @id";
             Dictionary<string, object> parameters = new Dictionary<string, object>() { { "@id", userId } };
 
-            var rows = _database.Query(commandText, parameters);
+            var rows = _database.ExecuteReader(commandText, parameters, this.ReadUser);
             if (rows != null && rows.Count == 1)
             {
-                user = ReadUser(rows[0]);
+                user = rows[0];
             }
 
             return user;
         }
 
-        private TUser ReadUser(Dictionary<String, String> row)
+        private TUser ReadUser(DbDataReader dbReader)
         {
-            TUser user = (TUser)Activator.CreateInstance(typeof(TUser));
-            user.Id = row["Id"];
-            user.UserName = row["UserName"];
-            user.PasswordHash = string.IsNullOrEmpty(row["PasswordHash"]) ? null : row["PasswordHash"];
-            user.SecurityStamp = string.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"];
-            user.Email = row["Email"];
-            user.EmailConfirmed = row["EmailConfirmed"] == Boolean.TrueString ? true : false;
-            user.PhoneNumber = string.IsNullOrEmpty(row["PhoneNumber"]) ? null : row["PhoneNumber"];
-            user.PhoneNumberConfirmed = row["PhoneNumberConfirmed"] == "1" ? true : false;
-            user.LockoutEnabled = row["LockoutEnabled"] == Boolean.TrueString ? true : false;
-            user.TwoFactorEnabled = row["TwoFactorEnabled"] == Boolean.TrueString ? true : false;
-            user.LockoutEndDateUtc = string.IsNullOrEmpty(row["LockoutEndDateUtc"]) ? (DateTime?)null : DateTime.Parse(row["LockoutEndDateUtc"]);
-            user.AccessFailedCount = string.IsNullOrEmpty(row["AccessFailedCount"]) ? 0 : int.Parse(row["AccessFailedCount"]);
+            var user = (TUser)Activator.CreateInstance(typeof(TUser));
+
+            user.Id = dbReader.GetString("Id");
+            user.Email = dbReader.GetString("Email");
+            user.EmailConfirmed = dbReader.GetBoolean("EmailConfirmed");
+            user.PasswordHash = dbReader.GetStringAsNullable("PasswordHash");
+            user.SecurityStamp = dbReader.GetStringAsNullable("SecurityStamp");
+            user.PhoneNumber = dbReader.GetStringAsNullable("PhoneNumber");
+            user.PhoneNumberConfirmed = dbReader.GetBoolean("PhoneNumberConfirmed");
+            user.TwoFactorEnabled = dbReader.GetBoolean("TwoFactorEnabled");
+            user.LockoutEndDateUtc = dbReader.GetDateTimeAsNullable("LockoutEndDateUtc");
+            user.LockoutEnabled = dbReader.GetBoolean("LockoutEnabled");
+            user.AccessFailedCount = dbReader.GetInt32("AccessFailedCount");
+            user.UserName = dbReader.GetString("UserName");
 
             return user;
         }
@@ -93,34 +104,18 @@ namespace AspNet.Identity.MySQL
         /// <returns></returns>
         public List<TUser> GetUserByName(string userName)
         {
-            List<TUser> users = new List<TUser>();
             string commandText = "Select * from users where UserName = @name";
             Dictionary<string, object> parameters = new Dictionary<string, object>() { { "@name", userName } };
 
-            var rows = _database.Query(commandText, parameters);
-            foreach(var row in rows)
-            {
-                TUser user = ReadUser(row);
-                users.Add(user);
-            }
-
-            return users;
+            return _database.ExecuteReader(commandText, parameters, this.ReadUser);
         }
 
         public List<TUser> GetUserByEmail(string email)
         {
-            List<TUser> users = new List<TUser>();
             string commandText = "Select * from users where Email = @email";
             Dictionary<string, object> parameters = new Dictionary<string, object>() { { "@email", email } };
 
-            var rows = _database.Query(commandText, parameters);
-            foreach (var row in rows)
-            {
-                TUser user = ReadUser(row);
-                users.Add(user);
-            }
-
-            return users;
+            return _database.ExecuteReader(commandText, parameters, this.ReadUser);
         }
 
         /// <summary>

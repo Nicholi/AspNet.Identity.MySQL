@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Common;
 
 namespace AspNet.Identity.MySQL
 {
@@ -25,18 +27,16 @@ namespace AspNet.Identity.MySQL
         /// <returns></returns>
         public List<string> FindByUserId(string userId)
         {
-            List<string> roles = new List<string>();
             string commandText = "Select r.Name from userroles AS ur, roles AS r where ur.UserId = @userId and ur.RoleId = r.Id";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("@userId", userId);
 
-            var rows = _database.Query(commandText, parameters);
-            foreach(var row in rows)
-            {
-                roles.Add(row["Name"]);
-            }
+            return _database.ExecuteReader(commandText, parameters, this.ReadRoleName);
+        }
 
-            return roles;
+        private String ReadRoleName(DbDataReader dbReader)
+        {
+            return dbReader.GetString("Name");
         }
 
         /// <summary>

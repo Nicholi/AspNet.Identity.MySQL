@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data.Common;
 using System.Security.Claims;
 
 namespace AspNet.Identity.MySQL
@@ -26,18 +27,19 @@ namespace AspNet.Identity.MySQL
         /// <returns></returns>
         public ClaimsIdentity FindByUserId(string userId)
         {
-            ClaimsIdentity claims = new ClaimsIdentity();
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity();
             string commandText = "Select * from userclaims where UserId = @UserId";
             Dictionary<string, object> parameters = new Dictionary<string, object>() { { "@UserId", userId } };
 
-            var rows = _database.Query(commandText, parameters);
-            foreach (var row in rows)
-            {
-                Claim claim = new Claim(row["ClaimType"], row["ClaimValue"]);
-                claims.AddClaim(claim);
-            }
+            var claims = _database.ExecuteReader(commandText, parameters, this.ReadClaim);
+            claimsIdentity.AddClaims(claims);
 
-            return claims;
+            return claimsIdentity;
+        }
+
+        private Claim ReadClaim(DbDataReader dbReader)
+        {
+            return new Claim(dbReader.GetString("ClaimType"), dbReader.GetString("ClaimValue"));
         }
 
         /// <summary>
